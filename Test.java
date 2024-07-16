@@ -1,3 +1,4 @@
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -6,6 +7,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.stream.IntStream;
 
 public class Test {
     public static void main(String[] args) throws ExecutionException, InterruptedException {
@@ -39,7 +41,21 @@ public class Test {
         // System.out.println("-------程序结束运行--------, 程序运行时间[" + (date2.getTime() -
         // date1.getTime()) + "] 毫秒");
 
-        System.out.println(0.1 + 0.2);
+        // try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
+        //     IntStream.range(0, 10_000).forEach(i -> {
+        //         executor.submit(() -> {
+        //             Thread.sleep(Duration.ofSeconds(1));
+        //             return i;
+        //         });
+        //     });
+        // }
+
+        // System.out.println("使用关键字synchronized");
+        // SyncThread syncThread = new SyncThread();
+        // Thread thread1 = new Thread(syncThread, "SyncThread1");
+        // Thread thread2 = new Thread(syncThread, "SyncThread2");
+        // thread1.start();
+        // thread2.start();
     }
 }
 
@@ -68,5 +84,28 @@ class MyCallable implements Callable<Object> {
         long time = dateTmpl2.getTime() - dateTmpl.getTime();
         System.out.println(">>> " + taskNum + "任务终止");
         return taskNum + "任务返回运行结果,当前任务时间[" + time + "]毫秒";
+    }
+}
+
+class SyncThread implements Runnable {
+    private static int count;
+    public SyncThread() {
+        count = 0;
+    }
+    public void run() {
+        synchronized (this) {
+            for (int i = 0; i < 5; i++) {
+                try {
+                    System.out.println(
+                        "线程名:" + Thread.currentThread().getName() + ":" + (count++));
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+    public int getCount() {
+        return count;
     }
 }

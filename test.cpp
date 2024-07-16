@@ -1,5 +1,5 @@
 #include <cstdio>
 int main() {
-    printf("hello world!");
+    printf("%f\n", 0.1 + 0.2);
     return 0;
 }

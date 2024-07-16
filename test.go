@@ -2,8 +2,10 @@ package main
 
 import (
 	"fmt"
+	"strings"
 )
 
 func main() {
-	fmt.Println(0.1 + 0.2)
+	items := strings.Split("2@qq.com", "@")
+	fmt.Printf("%v\n", items[1])
 }

@@ -1,5 +1,1 @@
-fun main(){
-    for (i in 0..10) {
-        
-    };
-}
+println(0.1+0.2);

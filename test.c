@@ -68,6 +68,6 @@ int main() {
     // printf("我是主函数哦，我正在等待线程完成任务阿，呵呵\n");
     // thread_wait();
 
-    printf("%f", 0.1 + 0.2);
+    printf("%f\n", 0.1 + 0.2);
     return 0;
 }
