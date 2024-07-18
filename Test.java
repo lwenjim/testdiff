@@ -9,13 +9,30 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.stream.IntStream;
 
-public class Test {
+public class Test extends Thread {
+    private static int count;
+
+    private String name;
+
+    public void run() {
+        for (int i = 0; i < 1000; i++) {
+            count++;
+        }
+    }
+
+    public Test(String name) {
+        this.name = name;
+    }
+
     public static void main(String[] args) throws ExecutionException, InterruptedException {
-        // MyThread mt1 = new MyThread();
-        // MyThread mt2 = new MyThread();
-        // mt1.start();
-        // mt2.start();
-        // System.out.println("Test.main()");
+        Test mt1 = new Test("A");
+        Test mt2 = new Test("B");
+        mt1.start();
+        mt2.start();
+        mt1.join();
+        mt2.join();
+        System.out.printf("%s, count: %d\n", mt2.name, count);
+        System.out.printf("%s, count: %d\n", mt1.name, count);
 
         // MyThread2 mtt2 = new MyThread2();
         // Thread td = new Thread(mtt2);
