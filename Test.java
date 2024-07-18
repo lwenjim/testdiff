@@ -1,13 +1,6 @@
-import java.time.Duration;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.stream.IntStream;
 
 public class Test extends Thread {
     private static int count;
@@ -16,8 +9,13 @@ public class Test extends Thread {
 
     public void run() {
         for (int i = 0; i < 1000; i++) {
-            count++;
+            count();
         }
+    }
+
+    public synchronized void count() {
+        count++;
+        System.out.printf("name: %s, count: %d\n", this.name, count);
     }
 
     public Test(String name) {
@@ -31,8 +29,9 @@ public class Test extends Thread {
         mt2.start();
         mt1.join();
         mt2.join();
-        System.out.printf("%s, count: %d\n", mt2.name, count);
-        System.out.printf("%s, count: %d\n", mt1.name, count);
+
+        Thread.startVirtualThread(() -> { System.out.println("hello"); });
+        Thread.ofVirtual().name("a").start(() -> { System.out.println("world"); });
 
         // MyThread2 mtt2 = new MyThread2();
         // Thread td = new Thread(mtt2);
