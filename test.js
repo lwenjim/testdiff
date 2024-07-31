@@ -5,16 +5,12 @@ async function f() {
     console.log(result);
 }
 
-
 f();
-//
-//
-//
+
 // async function f() {
 //     return Promise.resolve(1);
 // }
 // f().then(console.log);
-
 
 // var arr = [];
 // for (var i = 0; i < 10; i++) {

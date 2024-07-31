@@ -25,6 +25,7 @@ public class Test extends Thread {
     public static void main(String[] args) throws ExecutionException, InterruptedException {
         Test mt1 = new Test("A");
         Test mt2 = new Test("B");
+
         mt1.start();
         mt2.start();
         mt1.join();
