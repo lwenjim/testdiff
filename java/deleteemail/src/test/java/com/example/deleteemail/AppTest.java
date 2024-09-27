@@ -4,6 +4,7 @@ import javax.mail.Flags;
 import javax.mail.Folder;
 import javax.mail.Message;
 import javax.mail.Store;
+import javax.mail.internet.MimeMessage;
 
 import org.junit.Test;
 
@@ -11,6 +12,7 @@ import org.junit.Test;
  * mvn -q -Dtest=com.example.deleteemail.AppTest\#testMail test
  */
 public class AppTest {
+
     @Test
     public void mail() {
         try {
@@ -18,26 +20,30 @@ public class AppTest {
             Folder folder = store.getFolder("inbox");
             folder.open(Folder.READ_WRITE);
 
-            System.out.printf("未读数为: %s\n", folder.getUnreadMessageCount());
-            System.out.printf("新邮件数为: %s\n", folder.getNewMessageCount());
-            System.out.printf("已删除邮件数为: %s\n", folder.getDeletedMessageCount());
-            System.out.printf("邮件数为: %s\n", folder.getMessageCount());
-            for (int j = 1; j < 30; j++) {
-                Message[] messages = EmailTest.getMessages(folder, "tensorflow/tensorflow", -j);
-                System.out.println("邮件数量为:" + messages.length);
-                for (int i = 0; i < messages.length; i++) {
-                    String subject = messages[i].getSubject();
-                    if (subject.indexOf("flutter/flutter") == -1) {
-                        continue;
-                    }
-                    messages[i].setFlag(Flags.Flag.DELETED, true);
-                    System.out.println("前" + j + "天 第 " + (i + 1) + "封邮件的主题：" + subject);
+            Message[] messages = EmailTest.getMessages(folder, "tensorflow/tensorflow", -1);
+            System.out.println("邮件数量为:" + messages.length);
+            for (int i = 0; i < messages.length; i++) {
+                String subject = messages[i].getSubject();
+                String from = (messages[i].getFrom()[0]).toString();
+                System.out.printf(
+                        "\n第 %d 封邮件\n标题: %s\n发件人：%s\n邮件总数: %d\n未读邮件数: %d\n邮件是否已读: %s\n发送时间：%s\n邮件优先级：%s\n邮件大小：%skb\n",
+                        i + 1, subject, from, folder.getMessageCount(), folder.getUnreadMessageCount(),
+                        messages[i].getFlags().contains(Flags.Flag.SEEN) ? "是" : "否",
+                        EmailTest.getSentDate((MimeMessage) messages[i], null),
+                        EmailTest.getPriority((MimeMessage) messages[i]),
+                        ((MimeMessage) messages[i]).getSize() * 1024);
+
+                if (from.indexOf("notifications@github.com") == -1) {
+                    continue;
+                }
+                messages[i].setFlag(Flags.Flag.DELETED, true);
+                if (i % 10 != 0) {
                     folder.expunge();
                     folder.close(false);
+                    folder.open(Folder.READ_WRITE);
                 }
-                store.close();
-                break;
             }
+            store.close();
         } catch (Exception e) {
             System.out.println("异常： " + e);
         }

@@ -79,6 +79,7 @@ public class EmailTest {
         cal.set(Calendar.SECOND, 0);
         cal.set(Calendar.MILLISECOND, 0);
         Date mondayDate = cal.getTime();
+
         SearchTerm comparisonTermGe = new SentDateTerm(ComparisonTerm.GE, mondayDate);
         SearchTerm comparisonTermLe = new SentDateTerm(ComparisonTerm.LE, new Date());
         SearchTerm comparisonAndTerm = new AndTerm(comparisonTermGe, comparisonTermLe);
