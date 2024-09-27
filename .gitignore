@@ -2,3 +2,5 @@
 test
 a.out
 *.o
+node_modules
+target
