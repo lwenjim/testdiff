@@ -1,5 +1,4 @@
 /target
-test
 a.out
 *.o
 node_modules
