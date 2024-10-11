@@ -8,10 +8,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.Properties;
-
 import javax.mail.Address;
 import javax.mail.BodyPart;
 import javax.mail.Flags;
@@ -27,62 +25,58 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.MimeUtility;
-import javax.mail.search.AndTerm;
-import javax.mail.search.ComparisonTerm;
-import javax.mail.search.SearchTerm;
-import javax.mail.search.SentDateTerm;
-
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 
 public class EmailTest {
+    // @Test
+    // public void read() {
+    //     try {
+    //         Store store = getStore();
+    //         Folder folder = store.getFolder("Inbox");
+    //         folder.open(Folder.READ_WRITE);
+    //         Message[] messages =
+    //             folder.getMessages(folder.getMessageCount() - folder.getUnreadMessageCount() + 1,
+    //                 folder.getMessageCount());
+    //         System.out.println("邮件总数: " + folder.getMessageCount());
+    //         parseFileMessage(messages);
+    //         folder.setFlags(messages, new Flags(Flags.Flag.SEEN), true);
+    //     } catch (Exception e) {
+    //         System.out.println("异常： " + e);
+    //     }
+    // }
 
-    @Test
-    public void read() {
-        try {
-            Store store = getStore();
-            Folder folder = store.getFolder("Inbox");
-            folder.open(Folder.READ_WRITE);
-            Message[] messages = folder.getMessages(folder.getMessageCount() - folder.getUnreadMessageCount() + 1,
-                    folder.getMessageCount());
-            System.out.println("邮件总数: " + folder.getMessageCount());
-            parseFileMessage(messages);
-            folder.setFlags(messages, new Flags(Flags.Flag.SEEN), true);
-        } catch (Exception e) {
-            System.out.println("异常： " + e);
-        }
-    }
+    //     @Test
+    //     public void pop() {
+    //         try {
+    //             Store store = getStore();
+    //             Folder folder = store.getFolder("Inbox");
+    //
+    //             folder.open(Folder.READ_WRITE);
+    //             Message[] messages = getMessages(folder, "tensorflow/tensorflow", 1);
+    //
+    //             System.out.println("读取的邮件总数: " + messages.length);
+    //             parseFileMessage(messages);
+    //             folder.setFlags(messages, new Flags(Flags.Flag.SEEN), true);
+    //             System.out.println("邮件解析任务执行完毕");
+    //         } catch (Exception e) {
+    //             System.out.println(e.getMessage());
+    //         }
+    //     }
 
-    @Test
-    public void pop() {
-        try {
-            Store store = getStore();
-            Folder folder = store.getFolder("Inbox");
+    public static Message[] getMessages(Folder folder, Integer start, Integer end)
+        throws MessagingException {
+        // Calendar cal = Calendar.getInstance();
+        // cal.add(Calendar.DATE, dayNum);
+        // cal.set(Calendar.HOUR_OF_DAY, 0);
+        // cal.set(Calendar.MINUTE, 0);
+        // cal.set(Calendar.SECOND, 0);
+        // cal.set(Calendar.MILLISECOND, 0);
+        // Date mondayDate = cal.getTime();
 
-            folder.open(Folder.READ_WRITE);
-            Message[] messages = getMessages(folder, "tensorflow/tensorflow", 1);
-
-            System.out.println("读取的邮件总数: " + messages.length);
-            parseFileMessage(messages);
-            folder.setFlags(messages, new Flags(Flags.Flag.SEEN), true);
-            System.out.println("邮件解析任务执行完毕");
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-        }
-    }
-
-    public static Message[] getMessages(Folder folder, String keyword, Integer dayNum) throws MessagingException {
-        Calendar cal = Calendar.getInstance();
-        cal.add(Calendar.DATE, dayNum);
-        cal.set(Calendar.HOUR_OF_DAY, 0);
-        cal.set(Calendar.MINUTE, 0);
-        cal.set(Calendar.SECOND, 0);
-        cal.set(Calendar.MILLISECOND, 0);
-        Date mondayDate = cal.getTime();
-
-        SearchTerm comparisonTermGe = new SentDateTerm(ComparisonTerm.GE, mondayDate);
-        SearchTerm comparisonTermLe = new SentDateTerm(ComparisonTerm.LE, new Date());
-        SearchTerm comparisonAndTerm = new AndTerm(comparisonTermGe, comparisonTermLe);
+        // SearchTerm comparisonTermGe = new SentDateTerm(ComparisonTerm.GE, mondayDate);
+        // SearchTerm comparisonTermLe = new SentDateTerm(ComparisonTerm.LE, new Date());
+        // SearchTerm comparisonAndTerm = new AndTerm(comparisonTermGe, comparisonTermLe);
 
         // SearchTerm text = new SearchTerm() {
         //     public boolean match(Message message) {
@@ -96,7 +90,9 @@ public class EmailTest {
         //         return false;
         //     }
         // };
-        Message[] messages = folder.search(comparisonAndTerm);
+        // Message[] messages = folder.search(comparisonAndTerm);
+        Message[] messages = folder.getMessages(start, end);
+        // Message[] messages = folder.getMessages();
         return messages;
     }
 
@@ -121,7 +117,8 @@ public class EmailTest {
         }
         for (Message message : messages) {
             MimeMessage msg = (MimeMessage) message;
-            System.out.println("------------------解析第" + msg.getMessageNumber() + "封邮件-------------------- ");
+            System.out.println("------------------解析第" + msg.getMessageNumber()
+                + "封邮件-------------------- ");
             System.out.println("主题: " + MimeUtility.decodeText(msg.getSubject()));
             System.out.println("发件人: " + getFrom(msg));
             System.out.println("收件人：" + getReceiveAddress(msg, null));
@@ -132,7 +129,8 @@ public class EmailTest {
             System.out.println("邮件大小：" + msg.getSize() * 1024 + "kb");
             StringBuffer content = new StringBuffer(30);
             getMailTextContent(msg, content);
-            System.out.println("邮件正文：" + (content.length() > 100 ? content.substring(0, 100) + "..." : content));
+            System.out.println("邮件正文："
+                + (content.length() > 100 ? content.substring(0, 100) + "..." : content));
 
             System.out.println();
             boolean isContainerAttachment = isContainAttachment(msg);
@@ -140,23 +138,24 @@ public class EmailTest {
             if (isContainerAttachment) {
                 saveAttachment(msg, "/tmp/email/File", msg.getFileName());
             }
-            System.out.println("------------------第" + msg.getMessageNumber() + "封邮件解析结束-------------------- ");
+            System.out.println("------------------第" + msg.getMessageNumber()
+                + "封邮件解析结束-------------------- ");
         }
     }
 
     /**
      * 获得邮件发件人
-     * 
+     *
      * @param msg 邮件内容
      * @return 姓名 <Email地址>
      * @throws MessagingException
      * @throws UnsupportedEncodingException
      */
-    public static String getFrom(MimeMessage msg) throws MessagingException, UnsupportedEncodingException {
+    public static String getFrom(MimeMessage msg)
+        throws MessagingException, UnsupportedEncodingException {
         String from = "";
         Address[] froms = msg.getFrom();
-        if (froms.length < 1)
-            throw new MessagingException("没有发件人!");
+        if (froms.length < 1) throw new MessagingException("没有发件人!");
         InternetAddress address = (InternetAddress) froms[0];
         String person = address.getPersonal();
         if (person != null) {
@@ -171,25 +170,23 @@ public class EmailTest {
 
     /**
      * 获得邮件发送时间
-     * 
+     *
      * @param msg 邮件内容
      * @return yyyy年mm月dd日 星期X HH:mm
      * @throws MessagingException
      */
     public static String getSentDate(MimeMessage msg, String pattern) throws MessagingException {
         Date receivedDate = msg.getSentDate();
-        if (receivedDate == null)
-            return "";
+        if (receivedDate == null) return "";
 
-        if (pattern == null || "".equals(pattern))
-            pattern = "yyyy年MM月dd日 E HH:mm ";
+        if (pattern == null || "".equals(pattern)) pattern = "yyyy年MM月dd日 E HH:mm ";
 
         return new SimpleDateFormat(pattern).format(receivedDate);
     }
 
     /**
      * 判断邮件是否已读
-     * 
+     *
      * @param msg 邮件内容
      * @return 如果邮件已读返回true,否则返回false
      * @throws MessagingException
@@ -200,7 +197,7 @@ public class EmailTest {
 
     /**
      * 判断邮件是否需要阅读回执
-     * 
+     *
      * @param msg 邮件内容
      * @return 需要回执返回true,否则返回false
      * @throws MessagingException
@@ -208,14 +205,13 @@ public class EmailTest {
     public static boolean isReplySign(MimeMessage msg) throws MessagingException {
         boolean replySign = false;
         String[] headers = msg.getHeader("Disposition-Notification-To");
-        if (headers != null)
-            replySign = true;
+        if (headers != null) replySign = true;
         return replySign;
     }
 
     /**
      * 获得邮件的优先级
-     * 
+     *
      * @param msg 邮件内容
      * @return 1(High):紧急 3:普通(Normal) 5:低(Low)
      * @throws MessagingException
@@ -246,13 +242,14 @@ public class EmailTest {
      * <p>
      * Message.RecipientType.BCC 密送
      * </p>
-     * 
+     *
      * @param msg  邮件内容
      * @param type 收件人类型
      * @return 收件人1 <邮件地址1>, 收件人2 <邮件地址2>, ...
      * @throws MessagingException
      */
-    public static String getReceiveAddress(MimeMessage msg, Message.RecipientType type) throws MessagingException {
+    public static String getReceiveAddress(MimeMessage msg, Message.RecipientType type)
+        throws MessagingException {
         StringBuilder receiveAddress = new StringBuilder();
         Address[] addresss;
         if (type == null) {
@@ -261,8 +258,7 @@ public class EmailTest {
             addresss = msg.getRecipients(type);
         }
 
-        if (addresss == null || addresss.length < 1)
-            throw new MessagingException("没有收件人!");
+        if (addresss == null || addresss.length < 1) throw new MessagingException("没有收件人!");
         for (Address address : addresss) {
             InternetAddress internetAddress = (InternetAddress) address;
             receiveAddress.append(internetAddress.toUnicodeString()).append(",");
@@ -284,7 +280,9 @@ public class EmailTest {
             for (int i = 0; i < partCount; i++) {
                 BodyPart bodyPart = multipart.getBodyPart(i);
                 String disp = bodyPart.getDisposition();
-                if (disp != null && (disp.equalsIgnoreCase(Part.ATTACHMENT) || disp.equalsIgnoreCase(Part.INLINE))) {
+                if (disp != null
+                    && (disp.equalsIgnoreCase(Part.ATTACHMENT)
+                        || disp.equalsIgnoreCase(Part.INLINE))) {
                     flag = true;
                 } else if (bodyPart.isMimeType("multipart/*")) {
                     flag = isContainAttachment(bodyPart);
@@ -299,8 +297,7 @@ public class EmailTest {
                     }
                 }
 
-                if (flag)
-                    break;
+                if (flag) break;
             }
         } else if (part.isMimeType("message/rfc822")) {
             flag = isContainAttachment((Part) part.getContent());
@@ -328,7 +325,9 @@ public class EmailTest {
                 String disp = bodyPart.getDisposition();
                 String decodeName = decodeText(bodyPart.getFileName());
                 decodeName = StringUtils.isEmpty(decodeName) ? fileName : decodeName;
-                if (disp != null && (disp.equalsIgnoreCase(Part.ATTACHMENT) || disp.equalsIgnoreCase(Part.INLINE))) {
+                if (disp != null
+                    && (disp.equalsIgnoreCase(Part.ATTACHMENT)
+                        || disp.equalsIgnoreCase(Part.INLINE))) {
                     saveFile(bodyPart.getInputStream(), destDir, decodeName);
                 } else if (bodyPart.isMimeType("multipart/*")) {
                     saveAttachment(bodyPart, destDir, fileName);
@@ -346,13 +345,14 @@ public class EmailTest {
 
     /**
      * 获得邮件文本内容
-     * 
+     *
      * @param part    邮件体
      * @param content 存储邮件文本内容的字符串
      * @throws MessagingException
      * @throws IOException
      */
-    public static void getMailTextContent(Part part, StringBuffer content) throws MessagingException, IOException {
+    public static void getMailTextContent(Part part, StringBuffer content)
+        throws MessagingException, IOException {
         // 如果是文本类型的附件，通过getContent方法可以取到文本内容，但这不是我们需要的结果，所以在这里要做判断
         boolean isContainTextAttach = part.getContentType().indexOf("name") > 0;
         if (part.isMimeType("text/*") && !isContainTextAttach) {
@@ -379,7 +379,8 @@ public class EmailTest {
     private static void saveFile(InputStream is, String destDir, String fileName) throws Exception {
         createEmptyDirectory(destDir);
         BufferedInputStream bis = new BufferedInputStream(is);
-        BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(new File(destDir + fileName)));
+        BufferedOutputStream bos =
+            new BufferedOutputStream(new FileOutputStream(new File(destDir + fileName)));
         int len;
         while ((len = bis.read()) != -1) {
             bos.write(len);
