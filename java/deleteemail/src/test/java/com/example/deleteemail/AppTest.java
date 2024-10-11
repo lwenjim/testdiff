@@ -12,24 +12,48 @@ import org.junit.Test;
  */
 public class AppTest {
     @Test
+<<<<<<< Updated upstream
     public void mail() throws Exception {
         Store store = EmailTest.getStore();
         Folder folder = store.getFolder("inbox");
         folder.open(Folder.READ_WRITE);
+||||||| Stash base
+    public void mail() {
+=======
+    public void mail() {
+        Integer start = 154176;
+>>>>>>> Stashed changes
         while (true) {
             try {
+<<<<<<< Updated upstream
                 Integer totalCount = folder.getMessageCount();
                 if (totalCount <= 0) {
                     break;
                 }
                 Message[] messages = EmailTest.getMessages(folder, totalCount - 1000, totalCount);
+||||||| Stash base
+                Store store = EmailTest.getStore();
+                Folder folder = store.getFolder("inbox");
+                folder.open(Folder.READ_WRITE);
+
+                Message[] messages = EmailTest.getMessages(folder, "tensorflow/tensorflow", -1);
+=======
+                Store store = EmailTest.getStore();
+                Folder folder = store.getFolder("inbox");
+                folder.open(Folder.READ_WRITE);
+                Message[] messages = EmailTest.getMessages(folder, "tensorflow/tensorflow", -1000, start-1000,
+                        start);
+>>>>>>> Stashed changes
                 System.out.println("邮件数量为:" + messages.length);
+                start -= 1000;
                 if (messages.length == 0) {
                     break;
                 }
+
                 for (int i = 0; i < messages.length; i++) {
                     String subject = messages[i].getSubject();
                     String from = (messages[i].getFrom()[0]).toString();
+                    System.out.println(from);
                     if (from.indexOf("notifications@github.com") == -1) {
                         continue;
                     }
