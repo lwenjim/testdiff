@@ -12,16 +12,16 @@ import org.junit.Test;
  */
 public class AppTest {
     @Test
-    public void mail() {
-        Integer totalCount = 94579;
+    public void mail() throws Exception {
+        Store store = EmailTest.getStore();
+        Folder folder = store.getFolder("inbox");
+        folder.open(Folder.READ_WRITE);
         while (true) {
             try {
+                Integer totalCount = folder.getMessageCount();
                 if (totalCount <= 0) {
                     break;
                 }
-                Store store = EmailTest.getStore();
-                Folder folder = store.getFolder("inbox");
-                folder.open(Folder.READ_WRITE);
                 Message[] messages = EmailTest.getMessages(folder, totalCount - 1000, totalCount);
                 System.out.println("邮件数量为:" + messages.length);
                 if (messages.length == 0) {
@@ -46,12 +46,9 @@ public class AppTest {
                     messages[i].setFlag(Flags.Flag.DELETED, true);
                     if (i % 10 != 0) {
                         folder.expunge();
-                        folder.close(false);
-                        folder.open(Folder.READ_WRITE);
                     }
                 }
                 store.close();
-                totalCount -= 1000;
             } catch (Exception e) {
                 System.out.println("异常： " + e);
             }
