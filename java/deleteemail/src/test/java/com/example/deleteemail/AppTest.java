@@ -13,9 +13,12 @@ import org.junit.Test;
 public class AppTest {
     @Test
     public void mail() {
-        Integer totalCount = 95584;
+        Integer totalCount = 94579;
         while (true) {
             try {
+                if (totalCount <= 0) {
+                    break;
+                }
                 Store store = EmailTest.getStore();
                 Folder folder = store.getFolder("inbox");
                 folder.open(Folder.READ_WRITE);
