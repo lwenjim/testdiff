@@ -10,6 +10,7 @@ import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Properties;
+
 import javax.mail.Address;
 import javax.mail.BodyPart;
 import javax.mail.Flags;
@@ -25,18 +26,8 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.MimeUtility;
-<<<<<<< Updated upstream
-||||||| Stash base
-import javax.mail.search.AndTerm;
-import javax.mail.search.ComparisonTerm;
-import javax.mail.search.SearchTerm;
-import javax.mail.search.SentDateTerm;
 
-=======
-
->>>>>>> Stashed changes
 import org.apache.commons.lang3.StringUtils;
-import org.junit.Test;
 
 public class EmailTest {
     // @Test
@@ -74,60 +65,7 @@ public class EmailTest {
     //         }
     //     }
 
-    public static Message[] getMessages(Folder folder, Integer start, Integer end)
-        throws MessagingException {
-        // Calendar cal = Calendar.getInstance();
-        // cal.add(Calendar.DATE, dayNum);
-        // cal.set(Calendar.HOUR_OF_DAY, 0);
-        // cal.set(Calendar.MINUTE, 0);
-        // cal.set(Calendar.SECOND, 0);
-        // cal.set(Calendar.MILLISECOND, 0);
-        // Date mondayDate = cal.getTime();
-
-<<<<<<< Updated upstream
-        // SearchTerm comparisonTermGe = new SentDateTerm(ComparisonTerm.GE, mondayDate);
-        // SearchTerm comparisonTermLe = new SentDateTerm(ComparisonTerm.LE, new Date());
-        // SearchTerm comparisonAndTerm = new AndTerm(comparisonTermGe, comparisonTermLe);
-||||||| Stash base
-            folder.open(Folder.READ_WRITE);
-            Message[] messages = getMessages(folder, "tensorflow/tensorflow", 1);
-
-            System.out.println("读取的邮件总数: " + messages.length);
-            parseFileMessage(messages);
-            folder.setFlags(messages, new Flags(Flags.Flag.SEEN), true);
-            System.out.println("邮件解析任务执行完毕");
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-        }
-    }
-
-    public static Message[] getMessages(Folder folder, String keyword, Integer dayNum) throws MessagingException {
-        Calendar cal = Calendar.getInstance();
-        cal.add(Calendar.DATE, dayNum);
-        cal.set(Calendar.HOUR_OF_DAY, 0);
-        cal.set(Calendar.MINUTE, 0);
-        cal.set(Calendar.SECOND, 0);
-        cal.set(Calendar.MILLISECOND, 0);
-        Date mondayDate = cal.getTime();
-
-        SearchTerm comparisonTermGe = new SentDateTerm(ComparisonTerm.GE, mondayDate);
-        SearchTerm comparisonTermLe = new SentDateTerm(ComparisonTerm.LE, new Date());
-        SearchTerm comparisonAndTerm = new AndTerm(comparisonTermGe, comparisonTermLe);
-=======
-            folder.open(Folder.READ_WRITE);
-            Message[] messages = getMessages(folder, "tensorflow/tensorflow", 1);
-
-            System.out.println("读取的邮件总数: " + messages.length);
-            parseFileMessage(messages);
-            folder.setFlags(messages, new Flags(Flags.Flag.SEEN), true);
-            System.out.println("邮件解析任务执行完毕");
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-        }
-    }
-
-    public static Message[] getMessages(Folder folder, String keyword, Integer dayNum, Integer start, Integer end)
-            throws MessagingException {
+    public static Message[] getMessages(Folder folder, Integer start, Integer end) throws MessagingException {
         // Calendar cal = Calendar.getInstance();
         // cal.add(Calendar.DATE, dayNum);
         // cal.set(Calendar.HOUR_OF_DAY, 0);
@@ -138,7 +76,6 @@ public class EmailTest {
         // SearchTerm comparisonTermGe = new SentDateTerm(ComparisonTerm.GE, mondayDate);
         // SearchTerm comparisonTermLe = new SentDateTerm(ComparisonTerm.LE, new Date());
         // SearchTerm comparisonAndTerm = new AndTerm(comparisonTermGe, comparisonTermLe);
->>>>>>> Stashed changes
 
         // SearchTerm text = new SearchTerm() {
         //     public boolean match(Message message) {
@@ -152,17 +89,9 @@ public class EmailTest {
         //         return false;
         //     }
         // };
-<<<<<<< Updated upstream
-        // Message[] messages = folder.search(comparisonAndTerm);
-        Message[] messages = folder.getMessages(start, end);
-        // Message[] messages = folder.getMessages();
-||||||| Stash base
-        Message[] messages = folder.search(comparisonAndTerm);
-=======
 
         // Message[] messages = folder.search(comparisonAndTerm);
         Message[] messages = folder.getMessages(start, end);
->>>>>>> Stashed changes
         return messages;
     }
 
