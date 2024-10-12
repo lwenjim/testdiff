@@ -1,21 +1,21 @@
 package main
 
 import (
+	"os"
+
 	"gopkg.in/gomail.v2"
 )
 
 func main() {
 	m := gomail.NewMessage()
-	m.SetHeader("From", "alex@example.com")
-	m.SetHeader("To", "bob@example.com", "cora@example.com")
-	m.SetAddressHeader("Cc", "dan@example.com", "Dan")
+	m.SetHeader("From", os.Getenv("EMAIL_ACCOUNT"))
+	m.SetHeader("To", os.Getenv("EMAIL_ACCOUNT"), os.Getenv("EMAIL_ACCOUNT"))
+	m.SetAddressHeader("Cc", os.Getenv("EMAIL_ACCOUNT"), "Dan")
 	m.SetHeader("Subject", "Hello!")
 	m.SetBody("text/html", "Hello <b>Bob</b> and <i>Cora</i>!")
-	m.Attach("/home/Alex/lolcat.jpg")
+	m.Attach("/var/log/system.log")
 
-	d := gomail.NewDialer("smtp.example.com", 587, "user", "123456")
-
-	// Send the email to Bob, Cora and Dan.
+	d := gomail.NewDialer("smtp.qq.com", 465, os.Getenv("EMAIL_ACCOUNT"), os.Getenv("EMAIL_TOKEN"))
 	if err := d.DialAndSend(m); err != nil {
 		panic(err)
 	}

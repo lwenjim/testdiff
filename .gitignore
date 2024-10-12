@@ -1,5 +1,6 @@
-/target
+target
 a.out
 *.o
 node_modules
 target
+vendor
