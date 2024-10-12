@@ -33,7 +33,7 @@ public class AppTest {
                     break;
                 }
                 Message[] messages = EmailTest.getMessages(folder, totalCount - step * 12, totalCount);
-                if (messages.length < 2000) {
+                if (messages.length == 0) {
                     break;
                 }
                 Thread[] list = new Thread[12];
@@ -59,6 +59,7 @@ public class AppTest {
                                             EmailTest.getPriority((MimeMessage) messages[i]),
                                             ((MimeMessage) messages[i]).getSize() * 1024);
                                     messages[i].setFlag(Flags.Flag.DELETED, true);
+
                                 }
                             } catch (Exception e) {
                                 System.out.println("异常： " + e);
