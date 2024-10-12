@@ -11,11 +11,19 @@ import org.junit.Test;
 /**
  * mvn -q -Dtest=com.example.deleteemail.AppTest\#mail  test
  */
+// start = 0, i = 0, 1000
+// start = 1, i = 1000, 2000
+// start = 2, i = 2000, 3000
+// start = 3, i = 3000, 4000
+// ...
+// start = 11, i = 11000, 12000
 public class AppTest {
     @Test
     public void mail() throws Exception {
         Store store = EmailTest.getStore();
         Folder folder = store.getFolder("inbox");
+        int step = 10;
+        int threadNum = 4;
         while (true) {
             try {
                 if (!folder.isOpen()) {
@@ -25,37 +33,60 @@ public class AppTest {
                 if (totalCount <= 0) {
                     break;
                 }
-                Message[] messages = EmailTest.getMessages(folder, totalCount - 1000, totalCount);
-                System.out.println("邮件数量为:" + messages.length);
-                if (messages.length == 0) {
+                int w = totalCount - step * threadNum;
+                if (EmailTest.getMessages(folder, w, totalCount).length == 0) {
                     break;
                 }
-                for (int i = 0; i < messages.length; i++) {
-                    String subject = messages[i].getSubject();
-                    String from = (messages[i].getFrom()[0]).toString();
-                    System.out.println(from);
-                    if (from.indexOf("notifications@github.com") == -1) {
-                        continue;
-                    }
-                    System.out.printf(
-                            "\n第 %d 封邮件\n标题: %s\n发件人：%s\n邮件总数: %d\n未读邮件数: "
-                                    + "%d\n邮件是否已读: "
-                                    + "%s\n发送时间：%s\n邮件优先级：%s\n邮件大小：%skb\n",
-                            i + 1, subject, from, folder.getMessageCount(),
-                            folder.getUnreadMessageCount(),
-                            messages[i].getFlags().contains(Flags.Flag.SEEN) ? "是" : "否",
-                            EmailTest.getSentDate((MimeMessage) messages[i], null),
-                            EmailTest.getPriority((MimeMessage) messages[i]),
-                            ((MimeMessage) messages[i]).getSize() * 1024);
-                    messages[i].setFlag(Flags.Flag.DELETED, true);
-                    if (i % 10 != 0) {
-                        folder.expunge();
-                    }
+                Thread[] list = new Thread[threadNum];
+                for (int j = 0; j < threadNum; j++) {
+                    final int start = j;
+                    final int begin = w;
+                    Thread t = new Thread(new Runnable() {
+                        public void run() {
+                            try {
+                                Store store1 = EmailTest.getStore();
+                                Folder folder1 = store1.getFolder("inbox");
+                                if (!folder1.isOpen()) {
+                                    folder1.open(Folder.READ_WRITE);
+                                }
+                                Message[] messages = EmailTest.getMessages(folder, begin + start * step,
+                                        begin + (start + 1) * step -1);
+                                for (int i = 0; i < messages.length; i++) {
+                                    String subject = messages[i].getSubject();
+                                    String from = (messages[i].getFrom()[0]).toString();
+                                    System.out.println(from);
+                                    if (from.indexOf("notifications@github.com") == -1) {
+                                        continue;
+                                    }
+                                    System.out.printf(
+                                            "\n第 %d 封邮件\n标题: %s\n发件人：%s\n邮件总数: %d\n未读邮件数: " + "%d\n邮件是否已读: "
+                                                    + "%s\n发送时间：%s\n邮件优先级：%s\n邮件大小：%skb\n",
+                                            i + 1, subject, from, folder1.getMessageCount(),
+                                            folder1.getUnreadMessageCount(),
+                                            messages[i].getFlags().contains(Flags.Flag.SEEN) ? "是" : "否",
+                                            EmailTest.getSentDate((MimeMessage) messages[i], null),
+                                            EmailTest.getPriority((MimeMessage) messages[i]),
+                                            ((MimeMessage) messages[i]).getSize() * 1024);
+                                    messages[i].setFlag(Flags.Flag.DELETED, true);
+                                }
+                                folder1.expunge();
+                                store1.close();
+                            } catch (Exception e) {
+                                System.out.println("异常： " + e);
+                            }
+                        }
+                    }, String.format("%d", j));
+                    t.start();
+                    list[j] = t;
                 }
-                store.close();
+                for (Runnable r : list) {
+                    r.wait();
+                }
+                System.out.printf("已删除 %d 封邮件\n", step * 12);
             } catch (Exception e) {
                 System.out.println("异常： " + e);
             }
         }
+        store.close();
     }
 }

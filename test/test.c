@@ -61,7 +61,7 @@ void thread_wait(void) {
         printf("线程2已经结束\n");
     }
 }
-int main() {
+int main_pre() {
     // pthread_mutex_init(&mut, NULL);
     // printf("我是主函数哦，我正在创建线程，呵呵\n");
     // thread_create();
@@ -71,3 +71,28 @@ int main() {
     printf("%f\n", 0.1 + 0.2);
     return 0;
 }
+
+#include <stdio.h>
+#include <stdlib.h>
+
+long long fibonacci(int n);
+
+int main(int argc, char *argv[]) {
+    if (argc != 2) {
+        printf("使用方法: ./fib-c NUMBER\n");
+        return 1;
+    }
+
+    int n = atoi(argv[1]);
+    printf("The %dth Fibonacci number is %lld\n", n, fibonacci(n));
+
+    return 0;
+}
+
+long long fibonacci(int n) {
+    if (n <= 1)
+        return n;
+    else
+        return fibonacci(n - 1) + fibonacci(n - 2);
+}
+

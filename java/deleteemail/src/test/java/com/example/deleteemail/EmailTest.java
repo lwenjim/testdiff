@@ -116,8 +116,7 @@ public class EmailTest {
         }
         for (Message message : messages) {
             MimeMessage msg = (MimeMessage) message;
-            System.out.println("------------------解析第" + msg.getMessageNumber()
-                + "封邮件-------------------- ");
+            System.out.println("------------------解析第" + msg.getMessageNumber() + "封邮件-------------------- ");
             System.out.println("主题: " + MimeUtility.decodeText(msg.getSubject()));
             System.out.println("发件人: " + getFrom(msg));
             System.out.println("收件人：" + getReceiveAddress(msg, null));
@@ -128,17 +127,15 @@ public class EmailTest {
             System.out.println("邮件大小：" + msg.getSize() * 1024 + "kb");
             StringBuffer content = new StringBuffer(30);
             getMailTextContent(msg, content);
-            System.out.println("邮件正文："
-                + (content.length() > 100 ? content.substring(0, 100) + "..." : content));
+            System.out.println("邮件正文："+ (content.length() > 100 ? content.substring(0, 100) + "..." : content));
 
             System.out.println();
             boolean isContainerAttachment = isContainAttachment(msg);
             System.out.println("是否包含附件：" + isContainerAttachment);
-            if (isContainerAttachment) {
+            if (isContainerAttachment) {  
                 saveAttachment(msg, "/tmp/email/File", msg.getFileName());
             }
-            System.out.println("------------------第" + msg.getMessageNumber()
-                + "封邮件解析结束-------------------- ");
+            System.out.println("------------------第" + msg.getMessageNumber() + "封邮件解析结束-------------------- ");
         }
     }
 
@@ -151,20 +148,20 @@ public class EmailTest {
      * @throws UnsupportedEncodingException
      */
     public static String getFrom(MimeMessage msg)
-        throws MessagingException, UnsupportedEncodingException {
-        String from = "";
-        Address[] froms = msg.getFrom();
-        if (froms.length < 1) throw new MessagingException("没有发件人!");
-        InternetAddress address = (InternetAddress) froms[0];
-        String person = address.getPersonal();
-        if (person != null) {
-            person = MimeUtility.decodeText(person) + " ";
-        } else {
-            person = "";
-        }
-        from = person + "<" + address.getAddress() + ">";
+            throws MessagingException, UnsupportedEncodingException {
+            String from = "";
+            Address[] froms = msg.getFrom();
+            if (froms.length < 1) throw new MessagingException("没有发件人!");
+            InternetAddress address = (InternetAddress) froms[0];
+            String person = address.getPersonal();
+            if (person != null) {
+                person = MimeUtility.decodeText(person) + " ";
+            } else {
+                person = "";
+            }
+            from = person + "<" + address.getAddress() + ">";
 
-        return from;
+            return from;
     }
 
     /**
@@ -177,9 +174,7 @@ public class EmailTest {
     public static String getSentDate(MimeMessage msg, String pattern) throws MessagingException {
         Date receivedDate = msg.getSentDate();
         if (receivedDate == null) return "";
-
         if (pattern == null || "".equals(pattern)) pattern = "yyyy年MM月dd日 E HH:mm ";
-
         return new SimpleDateFormat(pattern).format(receivedDate);
     }
 
@@ -248,22 +243,22 @@ public class EmailTest {
      * @throws MessagingException
      */
     public static String getReceiveAddress(MimeMessage msg, Message.RecipientType type)
-        throws MessagingException {
-        StringBuilder receiveAddress = new StringBuilder();
-        Address[] addresss;
-        if (type == null) {
-            addresss = msg.getAllRecipients();
-        } else {
-            addresss = msg.getRecipients(type);
-        }
+            throws MessagingException {
+            StringBuilder receiveAddress = new StringBuilder();
+            Address[] addresss;
+            if (type == null) {
+                addresss = msg.getAllRecipients();
+            } else {
+                addresss = msg.getRecipients(type);
+            }
 
-        if (addresss == null || addresss.length < 1) throw new MessagingException("没有收件人!");
-        for (Address address : addresss) {
-            InternetAddress internetAddress = (InternetAddress) address;
-            receiveAddress.append(internetAddress.toUnicodeString()).append(",");
-        }
-        receiveAddress.deleteCharAt(receiveAddress.length() - 1); // 删除最后一个逗号
-        return receiveAddress.toString();
+            if (addresss == null || addresss.length < 1) throw new MessagingException("没有收件人!");
+            for (Address address : addresss) {
+                InternetAddress internetAddress = (InternetAddress) address;
+                receiveAddress.append(internetAddress.toUnicodeString()).append(",");
+            }
+            receiveAddress.deleteCharAt(receiveAddress.length() - 1); 
+            return receiveAddress.toString();
     }
 
     /**
@@ -279,9 +274,7 @@ public class EmailTest {
             for (int i = 0; i < partCount; i++) {
                 BodyPart bodyPart = multipart.getBodyPart(i);
                 String disp = bodyPart.getDisposition();
-                if (disp != null
-                    && (disp.equalsIgnoreCase(Part.ATTACHMENT)
-                        || disp.equalsIgnoreCase(Part.INLINE))) {
+                if (disp != null  && (disp.equalsIgnoreCase(Part.ATTACHMENT)  || disp.equalsIgnoreCase(Part.INLINE))) {
                     flag = true;
                 } else if (bodyPart.isMimeType("multipart/*")) {
                     flag = isContainAttachment(bodyPart);
@@ -324,9 +317,7 @@ public class EmailTest {
                 String disp = bodyPart.getDisposition();
                 String decodeName = decodeText(bodyPart.getFileName());
                 decodeName = StringUtils.isEmpty(decodeName) ? fileName : decodeName;
-                if (disp != null
-                    && (disp.equalsIgnoreCase(Part.ATTACHMENT)
-                        || disp.equalsIgnoreCase(Part.INLINE))) {
+                if (disp != null && (disp.equalsIgnoreCase(Part.ATTACHMENT)|| disp.equalsIgnoreCase(Part.INLINE))) {
                     saveFile(bodyPart.getInputStream(), destDir, decodeName);
                 } else if (bodyPart.isMimeType("multipart/*")) {
                     saveAttachment(bodyPart, destDir, fileName);
@@ -351,21 +342,21 @@ public class EmailTest {
      * @throws IOException
      */
     public static void getMailTextContent(Part part, StringBuffer content)
-        throws MessagingException, IOException {
-        // 如果是文本类型的附件，通过getContent方法可以取到文本内容，但这不是我们需要的结果，所以在这里要做判断
-        boolean isContainTextAttach = part.getContentType().indexOf("name") > 0;
-        if (part.isMimeType("text/*") && !isContainTextAttach) {
-            content.append(part.getContent().toString());
-        } else if (part.isMimeType("message/rfc822")) {
-            getMailTextContent((Part) part.getContent(), content);
-        } else if (part.isMimeType("multipart/*")) {
-            Multipart multipart = (Multipart) part.getContent();
-            int partCount = multipart.getCount();
-            for (int i = 0; i < partCount; i++) {
-                BodyPart bodyPart = multipart.getBodyPart(i);
-                getMailTextContent(bodyPart, content);
+            throws MessagingException, IOException {
+            // 如果是文本类型的附件，通过getContent方法可以取到文本内容，但这不是我们需要的结果，所以在这里要做判断
+            boolean isContainTextAttach = part.getContentType().indexOf("name") > 0;
+            if (part.isMimeType("text/*") && !isContainTextAttach) {
+                content.append(part.getContent().toString());
+            } else if (part.isMimeType("message/rfc822")) {
+                getMailTextContent((Part) part.getContent(), content);
+            } else if (part.isMimeType("multipart/*")) {
+                Multipart multipart = (Multipart) part.getContent();
+                int partCount = multipart.getCount();
+                for (int i = 0; i < partCount; i++) {
+                    BodyPart bodyPart = multipart.getBodyPart(i);
+                    getMailTextContent(bodyPart, content);
+                }
             }
-        }
     }
 
     /**
@@ -378,8 +369,7 @@ public class EmailTest {
     private static void saveFile(InputStream is, String destDir, String fileName) throws Exception {
         createEmptyDirectory(destDir);
         BufferedInputStream bis = new BufferedInputStream(is);
-        BufferedOutputStream bos =
-            new BufferedOutputStream(new FileOutputStream(new File(destDir + fileName)));
+        BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(new File(destDir + fileName)));
         int len;
         while ((len = bis.read()) != -1) {
             bos.write(len);
