@@ -33,7 +33,7 @@ public class AppTest {
                     break;
                 }
                 Message[] messages = EmailTest.getMessages(folder, totalCount - step * 12, totalCount);
-                if (messages.length == 0) {
+                if (messages.length < 2000) {
                     break;
                 }
                 Thread[] list = new Thread[12];
