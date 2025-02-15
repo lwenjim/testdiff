@@ -13,7 +13,7 @@ public class Test {
                         } catch (Exception e) {
                             System.out.println(e.getMessage());
                         }
-                        System.out.println(String.format("第 %d 现成结束", f));
+                        System.out.println(String.format("第 %d 线程结束", f));
                     }
                 }, String.format("%d", i));
                 list[i] = t;
