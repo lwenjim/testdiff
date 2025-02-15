@@ -1,6 +1,7 @@
 package com.example.deleteemail;
 
-import javax.mail.Flags;
+import java.util.concurrent.CountDownLatch;
+
 import javax.mail.Folder;
 import javax.mail.Message;
 import javax.mail.Store;
@@ -14,76 +15,68 @@ import org.junit.Test;
 public class AppTest {
 	@Test
 	public void mail() throws Exception {
+		String data = "App Store Connect <no_reply@email.apple.com>";
+		boolean i = data.indexOf("no_reply@email.apple.com") < 0;
+		System.out.println(i);
 		Store store = EmailTest.getStore();
 		Folder folder = store.getFolder("inbox");
 		int step = 10;
+		int groupNum = 12;
 		while (true) {
-			try {
-				if (!folder.isOpen()) {
-					folder.open(Folder.READ_WRITE);
-				}
-				Integer totalCount = folder.getMessageCount();
-				if (totalCount <= 0) {
-					break;
-				}
-				Message[] messages = EmailTest.getMessages(folder, totalCount - step * 12, totalCount);
-				if (messages.length == 0) {
-					break;
-				}
-				Thread[] list = new Thread[12];
-				for (int j = 0; j < 12; j++) {
-					Thread t = new Thread(new MyThread(j, 10, messages, folder));
-					t.start();
-					list[j] = t;
-				}
-				for (Runnable r : list) {
-					r.wait();
-				}
-				folder.expunge();
-			} catch (Exception e) {
-				System.out.println("异常： " + e);
+			if (!folder.isOpen()) {
+				folder.open(Folder.READ_WRITE);
 			}
+			Integer totalCount = folder.getMessageCount();
+			if (totalCount <= 0) {
+				break;
+			}
+			Message[] messages = EmailTest.getMessages(folder, totalCount - step * groupNum, totalCount - 1);
+			if (messages.length == 0) {
+				break;
+			}
+			CountDownLatch waitGroup = new CountDownLatch(groupNum);
+			for (int groupIndex = 0; groupIndex < groupNum; groupIndex++) {
+				new Thread(new InstanceThread(groupIndex, step, messages, folder, waitGroup)).start();
+			}
+			waitGroup.await();
+			folder.expunge();
 		}
 		store.close();
 	}
 }
 
-class MyThread implements Runnable {
-	protected int start;
-	protected int step;
+class InstanceThread implements Runnable {
+	protected int groupIndex;
+	protected int count;
 	protected Message[] messages;
 	protected Folder folder;
+	CountDownLatch waitGroup;
 
-	public MyThread(int start, int step, Message[] messages, Folder folder) {
-		this.start = start;
-		this.step = step;
+	public InstanceThread(int groupIndex, int count, Message[] messages, Folder folder, CountDownLatch waitGroup) {
+		this.groupIndex = groupIndex;
+		this.count = count;
 		this.messages = messages;
 		this.folder = folder;
+		this.waitGroup = waitGroup;
 	}
 
 	@Override
 	public void run() {
 		try {
-			for (int i = start * step; i < (start + 1) * step; i++) {
-				String subject = messages[i].getSubject();
-				String from = (messages[i].getFrom()[0]).toString();
-				System.out.println(from);
-				if (from.indexOf("notifications@github.com") == -1) {
+			for (int i = groupIndex * count; i < (groupIndex + 1) * count; i++) {
+				if (messages[i] == null) {
 					continue;
 				}
-				System.out.printf("第 %d 封邮件\n", i + 1);
-				System.out.printf("标题: %s\n", subject);
-				System.out.printf("发件人：%s\n", from);
-				System.out.printf("邮件总数: %d\n", folder.getMessageCount());
-				System.out.printf("未读邮件数: %d\n", folder.getUnreadMessageCount());
-				System.out.printf("邮件是否已读: %s\n", messages[i].getFlags().contains(Flags.Flag.SEEN) ? "是" : "否");
-				System.out.printf("发送时间：%s\n", EmailTest.getSentDate((MimeMessage) messages[i], null));
-				System.out.printf("邮件优先级：%s\n", EmailTest.getPriority((MimeMessage) messages[i]));
-				System.out.printf("邮件大小：%skb\n", ((MimeMessage) messages[i]).getSize() * 1024);
-				messages[i].setFlag(Flags.Flag.DELETED, true);
+				String senderName = EmailTest.getFrom((MimeMessage) messages[i]);
+				if (senderName.indexOf("no_reply@email.apple.com") == -1) {
+					System.out.println(senderName);
+					continue;
+				}
+				EmailTest.parseFileMessage(messages[0]);
 			}
 		} catch (Exception e) {
 			System.out.println("异常： " + e);
 		}
+		this.waitGroup.countDown();
 	}
 }

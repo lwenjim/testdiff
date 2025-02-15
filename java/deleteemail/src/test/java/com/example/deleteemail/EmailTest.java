@@ -109,7 +109,6 @@ public class EmailTest {
 		prop.put("mail.imap.ssl.protocols", "TLSv1.2");
 		Session session = Session.getInstance(prop);
 		Store store = session.getStore();
-		System.out.println(System.getenv("EMAIL_ACCOUNT"));
 		store.connect("imap.qq.com", System.getenv("EMAIL_ACCOUNT"), System.getenv("EMAIL_TOKEN"));
 		return store;
 	}
