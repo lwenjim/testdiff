@@ -49,10 +49,10 @@ public class AppTest {
 }
 
 class MyThread implements Runnable {
-	int start;
-	int step;
-	Message[] messages;
-	Folder folder;
+	protected int start;
+	protected int step;
+	protected Message[] messages;
+	protected Folder folder;
 
 	public MyThread(int start, int step, Message[] messages, Folder folder) {
 		this.start = start;
