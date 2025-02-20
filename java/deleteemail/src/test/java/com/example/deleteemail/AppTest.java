@@ -1,6 +1,5 @@
 package com.example.deleteemail;
 
-import java.util.Iterator;
 import java.util.concurrent.CountDownLatch;
 
 import javax.mail.Flags;
