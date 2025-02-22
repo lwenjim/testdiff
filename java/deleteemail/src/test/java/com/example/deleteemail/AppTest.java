@@ -1,81 +1,110 @@
 package com.example.deleteemail;
 
-import java.util.concurrent.CountDownLatch;
-
 import javax.mail.Flags;
 import javax.mail.Folder;
 import javax.mail.Message;
 import javax.mail.MessagingException;
-import javax.mail.NoSuchProviderException;
 import javax.mail.Store;
 import javax.mail.internet.MimeMessage;
 
-import org.junit.Test;
+import java.io.UnsupportedEncodingException;
+import java.util.concurrent.*;
 
-/**
- * mvn -q -Dtest=com.example.deleteemail.AppTest\#mail test
- */
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class AppTest {
+	private static final Logger logger = LoggerFactory.getLogger(AppTest.class);
+	private static final int BATCH_SIZE = 240; // STEP(20) * GROUP_NUM(12)
+	private static final int THREAD_POOL_SIZE = 12;
+
 	@Test
-	public void mail() throws NoSuchProviderException, MessagingException, InterruptedException {
-		Store store = EmailTest.getStore();
-		Folder folder = store.getFolder("inbox/JSPP");
-		int step = 20;
-		int groupNum = 12;
-		if (!folder.isOpen()) {
+	public void mail() {
+		try {
+			Store store = EmailTest.getStore();
+			Folder folder = store.getFolder("inbox");
 			folder.open(Folder.READ_WRITE);
-		}
-		Integer totalCount = folder.getMessageCount();
-		if (totalCount <= 0) {
-			return;
-		}
-		for (int page = 0; page <= totalCount / (step * groupNum) - 1; page++) {
-			Message[] messages = EmailTest.getMessages(folder, page * step * groupNum + 1, (page + 1) * step * groupNum);
-			System.out.printf("处理:%d - %d 之间的邮件\n", page * step * groupNum + 1, (page + 1) * step * groupNum);
-			if (messages.length == 0) {
-				break;
+			final int totalMessages = folder.getMessageCount();
+
+			if (totalMessages == 0)
+				return;
+
+			final ExecutorService executor = Executors.newFixedThreadPool(THREAD_POOL_SIZE);
+
+			for (int start = 1; start <= totalMessages; start += BATCH_SIZE) {
+				int end = Math.min(start + BATCH_SIZE - 1, totalMessages);
+				Message[] messages = folder.getMessages(start, end);
+
+				logger.info("Processing messages: {} - {}", start, end);
+
+				processMessagesConcurrently(messages, executor);
 			}
-			CountDownLatch waitGroup = new CountDownLatch(groupNum);
-			for (int groupIndex = 0; groupIndex < groupNum; groupIndex++) {
-				new Thread(new CurrentThread(groupIndex, step, messages, waitGroup)).start();
+
+			executor.shutdown();
+			if (!executor.awaitTermination(5, TimeUnit.MINUTES)) {
+				logger.warn("Thread pool did not terminate gracefully");
 			}
-			waitGroup.await();
-			folder.expunge();
+
+			folder.expunge(); // 所有批次处理完成后统一提交删除
+		} catch (Exception e) {
+			logger.error("Critical error occurred", e);
 		}
-		store.close();
+	}
+
+	private void processMessagesConcurrently(Message[] messages, ExecutorService executor) {
+		final int messagesPerThread = messages.length / THREAD_POOL_SIZE;
+		final CountDownLatch latch = new CountDownLatch(THREAD_POOL_SIZE);
+
+		for (int i = 0; i < THREAD_POOL_SIZE; i++) {
+			int startIdx = i * messagesPerThread;
+			int endIdx = (i == THREAD_POOL_SIZE - 1) ? messages.length : (i + 1) * messagesPerThread;
+
+			executor.submit(new DeleteTask(messages, startIdx, endIdx, latch));
+		}
+
+		try {
+			latch.await();
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			logger.error("Thread interrupted", e);
+		}
 	}
 }
 
-class CurrentThread implements Runnable {
-	private int groupIndex;
-	private int count;
-	private Message[] messages;
-	private CountDownLatch waitGroup;
+class DeleteTask implements Runnable {
+	private static final Logger logger = LoggerFactory.getLogger(DeleteTask.class);
+	private final Message[] messages;
+	private final int startIdx;
+	private final int endIdx;
+	private final CountDownLatch latch;
 
-	public CurrentThread(int groupIndex, int count, Message[] messages, CountDownLatch waitGroup) {
-		this.groupIndex = groupIndex;
-		this.count = count;
+	DeleteTask(Message[] messages, int startIdx, int endIdx, CountDownLatch latch) {
 		this.messages = messages;
-		this.waitGroup = waitGroup;
+		this.startIdx = startIdx;
+		this.endIdx = endIdx;
+		this.latch = latch;
 	}
 
 	@Override
 	public void run() {
-		try {
-			for (int i = groupIndex * count; i < (groupIndex + 1) * count; i++) {
-				if (messages[i] == null) {
-					continue;
+		for (int i = startIdx; i < endIdx; i++) {
+			Message message = messages[i];
+			if (message == null)
+				continue;
+
+			String sender;
+			try {
+				sender = EmailTest.getFrom((MimeMessage) message);
+				if (sender.contains("email.apple.com")) {
+					message.setFlag(Flags.Flag.DELETED, true);
+					logger.debug("Deleted email from: {}", sender);
 				}
-				String senderName = EmailTest.getFrom((MimeMessage) messages[i]);
-				if (senderName.indexOf("email.apple.com") == -1) {
-					continue;
-				}
-				messages[i].setFlag(Flags.Flag.DELETED, true);
-				System.out.printf("%s删除成功\n", senderName);
+			} catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
+			} catch (MessagingException e) {
+				e.printStackTrace();
 			}
-		} catch (Exception e) {
-			System.out.println("异常： " + e);
 		}
-		this.waitGroup.countDown();
 	}
 }
