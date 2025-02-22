@@ -30,71 +30,8 @@ import javax.mail.internet.MimeUtility;
 import org.apache.commons.lang3.StringUtils;
 
 public class EmailTest {
-	// @Test
-	// public void read() {
-	// try {
-	// Store store = getStore();
-	// Folder folder = store.getFolder("Inbox");
-	// folder.open(Folder.READ_WRITE);
-	// Message[] messages =
-	// folder.getMessages(folder.getMessageCount() - folder.getUnreadMessageCount()
-	// + 1,
-	// folder.getMessageCount());
-	// System.out.println("邮件总数: " + folder.getMessageCount());
-	// parseFileMessage(messages);
-	// folder.setFlags(messages, new Flags(Flags.Flag.SEEN), true);
-	// } catch (Exception e) {
-	// System.out.println("异常： " + e);
-	// }
-	// }
-
-	// @Test
-	// public void pop() {
-	// try {
-	// Store store = getStore();
-	// Folder folder = store.getFolder("Inbox");
-	//
-	// folder.open(Folder.READ_WRITE);
-	// Message[] messages = getMessages(folder, "tensorflow/tensorflow", 1);
-	//
-	// System.out.println("读取的邮件总数: " + messages.length);
-	// parseFileMessage(messages);
-	// folder.setFlags(messages, new Flags(Flags.Flag.SEEN), true);
-	// System.out.println("邮件解析任务执行完毕");
-	// } catch (Exception e) {
-	// System.out.println(e.getMessage());
-	// }
-	// }
 
 	public static Message[] getMessages(Folder folder, Integer start, Integer end) throws MessagingException {
-		// Calendar cal = Calendar.getInstance();
-		// cal.add(Calendar.DATE, dayNum);
-		// cal.set(Calendar.HOUR_OF_DAY, 0);
-		// cal.set(Calendar.MINUTE, 0);
-		// cal.set(Calendar.SECOND, 0);
-		// cal.set(Calendar.MILLISECOND, 0);
-		// Date mondayDate = cal.getTime();
-		// SearchTerm comparisonTermGe = new SentDateTerm(ComparisonTerm.GE,
-		// mondayDate);
-		// SearchTerm comparisonTermLe = new SentDateTerm(ComparisonTerm.LE, new
-		// Date());
-		// SearchTerm comparisonAndTerm = new AndTerm(comparisonTermGe,
-		// comparisonTermLe);
-
-		// SearchTerm text = new SearchTerm() {
-		// public boolean match(Message message) {
-		// try {
-		// if (message.getSubject().contains(keyword)) {
-		// return true;
-		// }
-		// } catch (MessagingException ex) {
-		// ex.printStackTrace();
-		// }
-		// return false;
-		// }
-		// };
-
-		// Message[] messages = folder.search(comparisonAndTerm);
 		Message[] messages = folder.getMessages(start, end);
 		return messages;
 	}

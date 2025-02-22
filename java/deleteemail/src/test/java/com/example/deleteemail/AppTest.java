@@ -20,11 +20,6 @@ public class AppTest {
 	public void mail() throws NoSuchProviderException, MessagingException, InterruptedException {
 		Store store = EmailTest.getStore();
 		Folder folder = store.getFolder("inbox/JSPP");
-		for (int i = 0; i < store.getPersonalNamespaces().length; i++) {
-			System.out.println((store.getPersonalNamespaces()[i].getFullName()));
-			System.out.println((store.getPersonalNamespaces()[i].getName()));
-			System.out.println();
-		}
 		int step = 20;
 		int groupNum = 12;
 		if (!folder.isOpen()) {
